@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Timer Application</title>
+    <link rel="shortcut icon" href="./logo.jpg" type="image/x-icon">
+    <style>
+        :root {
+            --primary-color: #ff6f61; /* Coral */
+            --secondary-color: #ff9a8b; /* Light Coral */
+            --tertiary-color: #ffb6b9; /* Pink */
+            --quaternary-color: #ffe0e0; /* Light Pink */
+            --background-color: #2c3e50; /* Dark Blue */
+            --text-color: #ecf0f1; /* Light Gray */
+            --input-background: #34495e; /* Darker Blue */
+            --button-text-color: #2c3e50; /* Dark Blue */
+        }
+
+        [data-theme="light"] {
+            --background-color: #ecf0f1; /* Light Gray */
+            --text-color: #2c3e50; /* Dark Blue */
+            --input-background: #ffffff; /* White */
+            --button-text-color: #ffffff; /* White */
+        }
+
+        [data-theme="high-contrast"] {
+            --background-color: #000000; /* Black */
+            --text-color: #ffffff; /* White */
+            --input-background: #000000; /* Black */
+            --button-text-color: #ffffff; /* White */
+            --primary-color: #ff0000; /* Red */
+            --secondary-color: #00ff00; /* Green */
+            --tertiary-color: #0000ff; /* Blue */
+            --quaternary-color: #ffff00; /* Yellow */
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1, h2 {
+            text-align: center;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--tertiary-color), var(--quaternary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .timer-container {
+            background-color: var(--input-background);
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+        }
+
+        .timer-display {
+            font-size: 2rem;
+            text-align: center;
+            margin: 0.5rem 0;
+            font-weight: bold;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--tertiary-color), var(--quaternary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .input-group, .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        input {
+            font-size: 1rem;
+            padding: 0.5rem;
+            border: 2px solid var(--primary-color);
+            border-radius: 5px;
+            width: 60px;
+            text-align: center;
+            background-color: var(--input-background);
+            color: var(--text-color);
+        }
+
+        button {
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--tertiary-color), var(--quaternary-color));
+            color: var(--button-text-color);
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+            flex: 1 1 45%;
+            margin: 0.5rem 0;
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, var(--quaternary-color), var(--tertiary-color), var(--secondary-color), var(--primary-color));
+        }
+
+        button:disabled {
+            background-color: #7f8c8d;
+            cursor: not-allowed;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #7f8c8d;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--tertiary-color), var(--quaternary-color));
+            width: 0%;
+            transition: width 1s linear;
+        }
+
+        .preset-buttons, .bookmark-buttons, .history-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .lap-times {
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        #addTimerBtn {
+            display: block;
+            margin: 1rem auto;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--tertiary-color), var(--quaternary-color));
+        }
+        .dropdownbuttons{
+            display: flex;
+            justify-content: space-between; /* Or space-between / center */
+            align-items: center;
+            gap: 1.5rem; /* Optional: Adds space between buttons */
+            margin-bottom: 1rem;
+        }
+        .theme-toggle, .fullscreen-toggle, .contrast-toggle {
+            display: inline-block; /* Ensure buttons behave correctly */
+            justify-content: space-around;
+            padding: 0.5rem 1rem;
+            
+        }
+
+        .theme-toggle button, .fullscreen-toggle button, .contrast-toggle button {
+            background: var(--input-background);
+            color: var(--text-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        @media (max-width: 600px) {
+            .timer-display {
+                font-size: 1.5rem;
+            }
+
+            input {
+                width: 50px;
+            }
+
+            button {
+                font-size: 0.8rem;
+                padding: 0.3rem 0.3rem;
+            }
+
+            .theme-toggle button, .fullscreen-toggle button, .contrast-toggle button {
+                font-size: 0.7rem;
+                padding: 0.3rem 0.3rem;
+            }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <div class="container">
+        <h1>Multi-Timer Application</h1>
+        <div class="dropdownbuttons">
+        <div class="theme-toggle">
+            <button id="themeToggleBtn">Toggle Theme</button>
+        </div>
+        <div class="contrast-toggle">
+            <button id="contrastToggleBtn">High Contrast</button>
+        </div>
+        <div class="fullscreen-toggle">
+            <button id="fullscreenToggleBtn">Full Screen</button>
+        </div>
+    </div>
+        <div id="timersContainer"></div>
+        <button id="addTimerBtn">Add New Timer</button>
+        <h2>Timer Presets</h2>
+        <div class="preset-buttons">
+            <button class="preset" data-time="300">5 minutes</button>
+            <button class="preset" data-time="600">10 minutes</button>
+            <button class="preset" data-time="1500">25 minutes</button>
+            <button class="preset" data-time="1800">Cooking</button>
+            <button class="preset" data-time="1200">Exercise</button>
+            <button class="preset" data-time="900">Work Break</button>
+        </div>
+
+        <h2>Bookmarked Timers</h2>
+        <div class="bookmark-buttons" id="bookmarkButtons"></div>
+
+        <h2>Timer History</h2>
+        <div class="history-buttons" id="historyButtons"></div>
+    </div>
+
+    <script>
+        let timers = [];
+        let timerIdCounter = 0;
+        let bookmarks = [];
+        let history = [];
+
+        function createTimerElement(id) {
+            const timerElement = document.createElement('div');
+            timerElement.className = 'timer-container';
+            timerElement.innerHTML = `
+                <div class="timer-display" id="display-${id}">00:00:00</div>
+                <div class="input-group">
+                    <input type="number" id="hours-${id}" placeholder="HH" min="0" max="23">
+                    <input type="number" id="minutes-${id}" placeholder="MM" min="0" max="59">
+                    <input type="number" id="seconds-${id}" placeholder="SS" min="0" max="59">
+                </div>
+                <div class="button-group">
+                    <button id="start-${id}">Start</button>
+                    <button id="pause-${id}" disabled>Pause</button>
+                    <button id="reset-${id}">Reset</button>
+                    <button id="lap-${id}">Lap</button>
+                    <button id="bookmark-${id}">Bookmark</button>
+                    <button id="share-${id}">Share</button>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-${id}"></div>
+                </div>
+                <div class="lap-times" id="laps-${id}"></div>
+            `;
+            return timerElement;
+        }
+
+        function addNewTimer() {
+            const id = timerIdCounter++;
+            const timerElement = createTimerElement(id);
+            document.getElementById('timersContainer').appendChild(timerElement);
+
+            const timer = {
+                id: id,
+                timeLeft: 0,
+                totalTime: 0,
+                isRunning: false,
+                laps: []
+            };
+
+            timers.push(timer);
+
+            document.getElementById(`start-${id}`).addEventListener('click', () => startTimer(id));
+            document.getElementById(`pause-${id}`).addEventListener('click', () => pauseTimer(id));
+            document.getElementById(`reset-${id}`).addEventListener('click', () => resetTimer(id));
+            document.getElementById(`lap-${id}`).addEventListener('click', () => recordLap(id));
+            document.getElementById(`bookmark-${id}`).addEventListener('click', () => bookmarkTimer(id));
+            document.getElementById(`share-${id}`).addEventListener('click', () => shareTimer(id));
+        }
+
+        function startTimer(id) {
+            const timer = timers.find(t => t.id === id);
+            if (!timer.isRunning) {
+                if (timer.timeLeft === 0) {
+                    const hours = parseInt(document.getElementById(`hours-${id}`).value || 0);
+                    const minutes = parseInt(document.getElementById(`minutes-${id}`).value || 0);
+                    const seconds = parseInt(document.getElementById(`seconds-${id}`).value || 0);
+                    timer.timeLeft = hours * 3600 + minutes * 60 + seconds;
+                    timer.totalTime = timer.timeLeft;
+                }
+                if (timer.timeLeft > 0) {
+                    timer.isRunning = true;
+                    document.getElementById(`start-${id}`).disabled = true;
+                    document.getElementById(`pause-${id}`).disabled = false;
+                    timer.interval = setInterval(() => {
+                        if (timer.timeLeft > 0) {
+                            timer.timeLeft--;
+                            updateDisplay(id);
+                        } else {
+                            clearInterval(timer.interval);
+                            timer.isRunning = false;
+                            document.getElementById(`start-${id}`).disabled = false;
+                            document.getElementById(`pause-${id}`).disabled = true;
+                            alert(`Timer ${id + 1} finished!`);
+                            if (navigator.vibrate) {
+                                navigator.vibrate(1000);
+                            }
+                            addToHistory(id);
+                        }
+                    }, 1000);
+                }
+            }
+        }
+
+        function pauseTimer(id) {
+            const timer = timers.find(t => t.id === id);
+            clearInterval(timer.interval);
+            timer.isRunning = false;
+            document.getElementById(`start-${id}`).disabled = false;
+            document.getElementById(`pause-${id}`).disabled = true;
+        }
+
+        function resetTimer(id) {
+            const timer = timers.find(t => t.id === id);
+            clearInterval(timer.interval);
+            timer.isRunning = false;
+            timer.timeLeft = 0;
+            timer.totalTime = 0;
+            timer.laps = [];
+            updateDisplay(id);
+            document.getElementById(`hours-${id}`).value = '';
+            document.getElementById(`minutes-${id}`).value = '';
+            document.getElementById(`seconds-${id}`).value = '';
+            document.getElementById(`start-${id}`).disabled = false;
+            document.getElementById(`pause-${id}`).disabled = true;
+            document.getElementById(`laps-${id}`).innerHTML = '';
+        }
+
+        function updateDisplay(id) {
+            const timer = timers.find(t => t.id === id);
+            const hours = Math.floor(timer.timeLeft / 3600);
+            const minutes = Math.floor((timer.timeLeft % 3600) / 60);
+            const seconds = timer.timeLeft % 60;
+            document.getElementById(`display-${id}`).textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            const progress = ((timer.totalTime - timer.timeLeft) / timer.totalTime) * 100;
+            document.getElementById(`progress-${id}`).style.width = `${progress}%`;
+        }
+
+        function recordLap(id) {
+            const timer = timers.find(t => t.id === id);
+            if (timer.isRunning) {
+                const lapTime = timer.totalTime - timer.timeLeft;
+                timer.laps.push(lapTime);
+                const lapElement = document.createElement('div');
+                lapElement.textContent = `Lap ${timer.laps.length}: ${formatTime(lapTime)}`;
+                document.getElementById(`laps-${id}`).appendChild(lapElement);
+            }
+        }
+
+        function formatTime(time) {
+            const hours = Math.floor(time / 3600);
+            const minutes = Math.floor((time % 3600) / 60);
+            const seconds = time % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function bookmarkTimer(id) {
+            const timer = timers.find(t => t.id === id);
+            const bookmark = {
+                id: bookmarks.length,
+                hours: Math.floor(timer.totalTime / 3600),
+                minutes: Math.floor((timer.totalTime % 3600) / 60),
+                seconds: timer.totalTime % 60
+            };
+            bookmarks.push(bookmark);
+            updateBookmarks();
+        }
+
+        function updateBookmarks() {
+            const bookmarkButtons = document.getElementById('bookmarkButtons');
+            bookmarkButtons.innerHTML = '';
+            bookmarks.forEach(bookmark => {
+                const button = document.createElement('button');
+                button.textContent = `${bookmark.hours}h ${bookmark.minutes}m ${bookmark.seconds}s`;
+                button.addEventListener('click', () => {
+                    const id = timers[timers.length - 1].id;
+                    document.getElementById(`hours-${id}`).value = bookmark.hours;
+                    document.getElementById(`minutes-${id}`).value = bookmark.minutes;
+                    document.getElementById(`seconds-${id}`).value = bookmark.seconds;
+                });
+                bookmarkButtons.appendChild(button);
+            });
+        }
+
+        function addToHistory(id) {
+            const timer = timers.find(t => t.id === id);
+            const historyItem = {
+                id: history.length,
+                hours: Math.floor(timer.totalTime / 3600),
+                minutes: Math.floor((timer.totalTime % 3600) / 60),
+                seconds: timer.totalTime % 60,
+                completionTime: new Date().toLocaleString()
+            };
+            history.push(historyItem);
+            updateHistory();
+        }
+
+        function updateHistory() {
+            const historyButtons = document.getElementById('historyButtons');
+            historyButtons.innerHTML = '';
+            history.forEach(item => {
+                const button = document.createElement('button');
+                button.textContent = `${item.hours}h ${item.minutes}m ${item.seconds}s - ${item.completionTime}`;
+                historyButtons.appendChild(button);
+            });
+        }
+
+        function shareTimer(id) {
+            const timer = timers.find(t => t.id === id);
+            const timerSettings = {
+                hours: Math.floor(timer.totalTime / 3600),
+                minutes: Math.floor((timer.totalTime % 3600) / 60),
+                seconds: timer.totalTime % 60
+            };
+            const timerSettingsString = JSON.stringify(timerSettings);
+            navigator.clipboard.writeText(timerSettingsString).then(() => {
+                alert('Timer settings copied to clipboard!');
+            });
+        }
+
+        document.getElementById('addTimerBtn').addEventListener('click', addNewTimer);
+
+        document.querySelectorAll('.preset').forEach(button => {
+            button.addEventListener('click', () => {
+                const presetTime = parseInt(button.dataset.time);
+                const id = timers[timers.length - 1].id;
+                const hours = Math.floor(presetTime / 3600);
+                const minutes = Math.floor((presetTime % 3600) / 60);
+                const seconds = presetTime % 60;
+                document.getElementById(`hours-${id}`).value = hours;
+                document.getElementById(`minutes-${id}`).value = minutes;
+                document.getElementById(`seconds-${id}`).value = seconds;
+            });
+        });
+
+        // Initialize with one timer
+        addNewTimer();
+
+        // Theme toggle functionality
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        themeToggleBtn.addEventListener('click', () => {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+        });
+
+        // High contrast mode toggle functionality
+        const contrastToggleBtn = document.getElementById('contrastToggleBtn');
+        contrastToggleBtn.addEventListener('click', () => {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'high-contrast' ? 'dark' : 'high-contrast';
+            body.setAttribute('data-theme', newTheme);
+        });
+
+        // Full screen mode toggle functionality
+        const fullscreenToggleBtn = document.getElementById('fullscreenToggleBtn');
+        fullscreenToggleBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        // Performance optimization
+        function throttle(fn, wait) {
+            let time = Date.now();
+            return function() {
+                if ((time + wait - Date.now()) < 0) {
+                    fn();
+                    time = Date.now();
+                }
+            }
+        }
+
+        function optimizedUpdateDisplay(id) {
+            throttle(() => updateDisplay(id), 1000);
+        }
+    </script>
+</body>
+</html>
